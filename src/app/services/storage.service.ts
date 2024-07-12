@@ -1,8 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
-import { Platform } from '@ionic/angular';
-import { Capacitor } from '@capacitor/core';
 import { Coordinate } from '../model/coordinate';
 
 @Injectable({
@@ -10,7 +7,7 @@ import { Coordinate } from '../model/coordinate';
 })
 export class StorageService {
 
-  constructor(private platform: Platform) { }
+  constructor() { }
 
   public coordinates: Coordinate[] = [];
 
@@ -28,8 +25,6 @@ export class StorageService {
   }
 
   public async updatePosition(coordinate: Coordinate, coors: Coordinate[]) {
-
-    //let coordinateR = coors.find(c => c.lat === coordinate.lat && c.lng === coordinate.lng);
 
     coordinate.description = coordinate.description;
     coordinate.title = coordinate.title;

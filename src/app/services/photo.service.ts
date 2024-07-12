@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 
-import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
+import { Camera, CameraResultType, CameraSource, GalleryPhotos, GalleryPhoto, Photo } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
 import { UserPhoto } from '../model/userPhoto';
 import { Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { Observable, from, of } from 'rxjs';
-//https://ionicframework.com/docs/angular/your-first-app
-//https://capacitorjs.com/docs/apis/camera
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,7 +20,43 @@ export class PhotoService {
 
   private PHOTO_STORAGE: string = 'photos';
 
-  private async savePicture(photo: Photo) {
+  public async addNewToGallery() {
+
+    const capturedPhoto = await Camera.getPhoto({
+      resultType: CameraResultType.Uri,
+      source: CameraSource.Camera,
+      quality: 100
+    });
+
+    const savedImageFile = await this.savePicture(capturedPhoto);
+    this.photos.unshift(savedImageFile);
+
+    Preferences.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos),
+    });
+
+  }
+
+  public async addImageToGallery() {
+
+    const capturedPhoto: GalleryPhotos = await Camera.pickImages({
+      quality: 100
+    });
+
+    let photo: GalleryPhoto = capturedPhoto.photos[0];
+
+    const savedImageFile = await this.savePicture(photo);
+    this.photos.unshift(savedImageFile);
+
+    Preferences.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos),
+    });
+
+  }
+
+  private async savePicture(photo: Photo | GalleryPhoto) {
 
     const base64Data = await this.readAsBase64(photo);
 
@@ -48,35 +83,6 @@ export class PhotoService {
     }
   }
 
-  public async addNewToGallery() {
-    const capturedPhoto = await Camera.getPhoto({
-      resultType: CameraResultType.Uri,
-      source: CameraSource.Camera,
-      quality: 100
-    });
-    /*
-    this.photos.unshift({
-      filepath: "soon...",
-      webviewPath: capturedPhoto.webPath!
-    });
-    */
-
-    const savedImageFile = await this.savePicture(capturedPhoto);
-    this.photos.unshift(savedImageFile);
-
-    Preferences.set({
-      key: this.PHOTO_STORAGE,
-      value: JSON.stringify(this.photos),
-    });
-
-  }
-
-  public async addImageToGallery() {
-    const capturedPhoto = await Camera.pickImages({
-      quality: 100
-    });
-  }
-
   public async loadSaved() {
 
     const { value } = await Preferences.get({ key: this.PHOTO_STORAGE });
@@ -96,7 +102,7 @@ export class PhotoService {
     }
   }
 
-  private async readAsBase64(photo: Photo) {
+  private async readAsBase64(photo: Photo | GalleryPhoto) {
 
     if (this.platform.is('hybrid')) {
 
@@ -147,7 +153,7 @@ export class PhotoService {
 
     if (this.platform.is('hybrid')) {
       return from(Camera.checkPermissions());
-    }else{
+    } else {
       return of('web');
     }
 
