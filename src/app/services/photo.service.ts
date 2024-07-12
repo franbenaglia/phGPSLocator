@@ -20,7 +20,47 @@ export class PhotoService {
 
   private PHOTO_STORAGE: string = 'photos';
 
+  public async getUserPhoto(): Promise<UserPhoto> {
+
+    return this.userPhoto();
+
+  }
+
+  public async getImage(): Promise<UserPhoto> {
+
+    const capturedPhoto: GalleryPhotos = await Camera.pickImages({
+      quality: 100
+    });
+
+    let photo: GalleryPhoto = capturedPhoto.photos[0];
+
+    return this.savePicture(photo);
+
+  }
+
   public async addNewToGallery() {
+    /*
+        const capturedPhoto = await Camera.getPhoto({
+          resultType: CameraResultType.Uri,
+          source: CameraSource.Camera,
+          quality: 100
+        });
+    
+        const savedImageFile = await this.savePicture(capturedPhoto);
+    */
+
+    const savedImageFile = await this.userPhoto();
+
+    this.photos.unshift(savedImageFile);
+
+    Preferences.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos),
+    });
+
+  }
+
+  private async userPhoto(): Promise<UserPhoto> {
 
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri,
@@ -28,13 +68,7 @@ export class PhotoService {
       quality: 100
     });
 
-    const savedImageFile = await this.savePicture(capturedPhoto);
-    this.photos.unshift(savedImageFile);
-
-    Preferences.set({
-      key: this.PHOTO_STORAGE,
-      value: JSON.stringify(this.photos),
-    });
+    return this.savePicture(capturedPhoto);
 
   }
 
@@ -64,7 +98,8 @@ export class PhotoService {
     const savedFile = await Filesystem.writeFile({
       path: fileName,
       data: base64Data,
-      directory: Directory.Data
+      //https://stackoverflow.com/questions/67039901/how-to-copy-a-private-folder-with-content-to-public-directory-in-android-q-and-h
+      directory: Directory.Data //https://github.com/ionic-team/capacitor/discussions/4487
     });
 
     if (this.platform.is('hybrid')) {

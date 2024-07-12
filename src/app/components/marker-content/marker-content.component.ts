@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { IonGrid, IonRow, IonLabel, IonInput, IonItem, IonButton } from "@ionic/angular/standalone";
 import { from } from 'rxjs';
 import { Coordinate } from 'src/app/model/coordinate';
+import { UserPhoto } from 'src/app/model/userPhoto';
+import { PhotoService } from 'src/app/services/photo.service';
 import { StorageService } from 'src/app/services/storage.service';
 import { environment } from 'src/environments/environment';
 
@@ -18,12 +20,13 @@ import { environment } from 'src/environments/environment';
 export class MarkerContentComponent implements OnInit {
 
 
-  constructor(private storage: StorageService, private router: Router) { }
+  constructor(private storage: StorageService, private router: Router, private photoService: PhotoService) { }
 
   @Input() coordinate: Coordinate;
   @Output() dismissPopOverEvent = new EventEmitter<Boolean>;
+  private image: UserPhoto;
 
-  urllocalserver: string = environment.localserver;
+  private urllocalserver: string = environment.localserver;
 
   ngOnInit() {
     this.load();
@@ -52,6 +55,7 @@ export class MarkerContentComponent implements OnInit {
 
       this.coordinate.description = description;
       this.coordinate.title = title;
+      this.coordinate.photo = this.image;
 
       if (!exist) {
         this.storage.addNewPosition(this.coordinate);
@@ -70,6 +74,14 @@ export class MarkerContentComponent implements OnInit {
       title: this.coordinate!.title,
       description: this.coordinate!.description,
     });
+  }
+
+  async upLoadPhoto() {
+    this.image = await this.photoService.getUserPhoto();
+  }
+
+  async upLoadImage() {
+    this.image = await this.photoService.getImage();
   }
 
   close() {

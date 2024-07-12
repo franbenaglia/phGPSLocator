@@ -1,3 +1,5 @@
+import { UserPhoto } from "./userPhoto";
+
 export class Coordinate {
 
     constructor(
@@ -9,6 +11,7 @@ export class Coordinate {
     lng: number;
     title: string;
     description: string;
+    photo: UserPhoto;
 
     toString(): string {
         return this.lat + ' ' + this.lng;
