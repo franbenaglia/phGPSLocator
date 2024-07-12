@@ -1,6 +1,10 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>photoAlbum</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button text="Previous" icon="chevron-forward-circle">
+      </ion-back-button>
+    </ion-buttons>
+    <ion-title>&nbsp;&nbsp;&nbsp;Photo Album</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -10,4 +14,11 @@
       <ion-title size="large">photoAlbum</ion-title>
     </ion-toolbar>
   </ion-header>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="4" *ngFor="let photo of photoService.photos; index as position">
+        <ion-img [src]="photo.webviewPath" (click)="showActionSheet(photo, position)"></ion-img>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

@@ -37,3 +37,20 @@
 @import '@ionic/angular/css/palettes/dark.system.css';
 
 @import '~leaflet/dist/leaflet.css';
+
+
+ion-popover {
+    --background: rgba(3, 3, 2, 0.6);
+    --backdrop-opacity: 0.6;
+    --box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.6);
+    --color: rgb(0, 0, 0);
+    --width: 300px;
+  }
+  
+  ion-popover ion-content {
+    --background: rgba(236, 243, 243, 0.6);
+  }
+  
+  ion-popover::part(backdrop) {
+    background-color: rgb(214, 195, 195);
+  }

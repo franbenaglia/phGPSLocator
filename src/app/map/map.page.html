@@ -1,6 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Open Street Map</ion-title>
+    <ion-title>&nbsp;&nbsp;&nbsp;phGPSLocator</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -10,6 +10,13 @@
       <ion-title size="large">map</ion-title>
     </ion-toolbar>
   </ion-header>
+  <ion-popover  #popover  trigger="top-center" side="top" alignment="center" [isOpen]="isPopoverOpen" (didDismiss)="isPopoverOpen = false">
+    <ng-template>
+      <app-marker-content  (dismissPopOverEvent)="closePopOver($event)"  [coordinate]="coordinate"></app-marker-content>
+    </ng-template>
+  </ion-popover>
   <ion-spinner *ngIf="spin"></ion-spinner>
   <div id='leafletMap'></div>
+  <ion-toast [isOpen]="isToastOpen" message="Lack of geolocation permission!!!" [duration]="5000"
+    (didDismiss)="setOpen(false)"></ion-toast>
 </ion-content>

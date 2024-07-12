@@ -6,6 +6,7 @@ import { Preferences } from '@capacitor/preferences';
 import { UserPhoto } from '../model/userPhoto';
 import { Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
+import { Observable, from, of } from 'rxjs';
 //https://ionicframework.com/docs/angular/your-first-app
 //https://capacitorjs.com/docs/apis/camera
 @Injectable({
@@ -53,7 +54,6 @@ export class PhotoService {
       source: CameraSource.Camera,
       quality: 100
     });
-
     /*
     this.photos.unshift({
       filepath: "soon...",
@@ -69,6 +69,12 @@ export class PhotoService {
       value: JSON.stringify(this.photos),
     });
 
+  }
+
+  public async addImageToGallery() {
+    const capturedPhoto = await Camera.pickImages({
+      quality: 100
+    });
   }
 
   public async loadSaved() {
@@ -135,6 +141,16 @@ export class PhotoService {
       path: filename,
       directory: Directory.Data
     });
+  }
+
+  public checkPermissions(): Observable<any> {
+
+    if (this.platform.is('hybrid')) {
+      return from(Camera.checkPermissions());
+    }else{
+      return of('web');
+    }
+
   }
 
 

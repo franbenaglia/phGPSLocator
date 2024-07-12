@@ -1,26 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonLabel, IonSpinner } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonLabel, IonSpinner, IonPopover, IonInput, IonToast } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 import { Platform } from '../model/platform';
 import { GeolocService } from '../services/geoloc.service';
+import { MarkerContentComponent } from '../components/marker-content/marker-content.component';
+import { Coordinate } from '../model/coordinate';
+import { StorageService } from '../services/storage.service';
+import { from } from 'rxjs';
 
 @Component({
   selector: 'app-map',
   templateUrl: './map.page.html',
   styleUrls: ['./map.page.scss'],
   standalone: true,
-  imports: [IonSpinner, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [IonToast, MarkerContentComponent, IonInput, IonPopover, IonSpinner, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
 })
 export class MapPage implements OnInit {
 
-  constructor(private geolocService: GeolocService) { }
+  constructor(private storage: StorageService, private geolocService: GeolocService) { }
 
   platform: Platform;
   positioncoords: string = '';
 
+  isToastOpen: boolean = false;
+
   ngOnInit() {
+    this.checkPermissions();
     this.position();
   }
 
@@ -34,6 +41,20 @@ export class MapPage implements OnInit {
 
   spin: boolean = true;
 
+  coordinate: Coordinate;
+
+  isPopoverOpen: boolean = false;
+
+  private iconMark = L.icon({
+    iconUrl: 'assets/icon/marker.png', //marker-icon.png
+    iconSize: [30, 40]
+  });
+
+  private iconCurrentPosition = L.icon({
+    iconUrl: 'assets/icon/fab.png', //marker-icon.png
+    iconSize: [40, 50]
+  });
+
   private position(): void {
 
     this.geolocService.getCurrentPosition().subscribe(position => {
@@ -43,7 +64,7 @@ export class MapPage implements OnInit {
     });
   }
 
-  loadLeafletMap(): void {
+  private loadLeafletMap(): void {
 
     this.spin = true;
 
@@ -62,37 +83,85 @@ export class MapPage implements OnInit {
 
     });
 
-
     this.leafletMap.setView([this.lat, this.lng], this.zoom);
+
+    this.configMap();
+
+    this.currentMarkerPosition();
+
+    this.loadSavedMarkers();
+
+    this.handlers();
+
+  }
+
+  popOverOnClick = () => {
+    this.isPopoverOpen = !this.isPopoverOpen;
+
+  }
+
+  private loadSavedMarkers(): void {
+
+    const self = this;
+
+    from(this.storage.getPositions()).subscribe(ms => {
+
+      let coordinates: Coordinate[] = JSON.parse(ms.value);
+
+      let i = 0;
+      let len = coordinates.length;
+
+      while (i < len) {
+        let mark = L.marker([coordinates[i].lat, coordinates[i].lng], { icon: this.iconMark }).addTo(this.leafletMap);
+        mark.addEventListener('click', (x) => {
+          self.isPopoverOpen = !self.isPopoverOpen;
+          self.coordinate = coordinates.find(c => c.lat === x.latlng.lat && c.lng === x.latlng.lng);
+        });
+        i++
+      }
+
+    }
+    );
+  }
+
+  private currentMarkerPosition(): void {
+
+    let marker = L.marker([this.lat, this.lng], { icon: this.iconCurrentPosition }).addTo(this.leafletMap)
+    let coordinate: Coordinate = new Coordinate();
+    coordinate.lat = this.lat;
+    coordinate.lng = this.lng;
+    marker.addEventListener('click', () => {
+      this.isPopoverOpen = !this.isPopoverOpen;
+      this.coordinate = coordinate;
+    });
+  }
+
+  private handlers(): void {
+
+    const self = this;
+
+    function onMapDoubleClick(e) {
+      let mark = L.marker([e.latlng.lat, e.latlng.lng], { icon: self.iconMark }).addTo(self.leafletMap);
+      let coordinate: Coordinate = new Coordinate();
+      coordinate.lat = e.latlng.lat;
+      coordinate.lng = e.latlng.lng;
+      mark.addEventListener('click', () => {
+        self.isPopoverOpen = !self.isPopoverOpen;
+        self.coordinate = coordinate;
+      });
+    }
+
+    this.leafletMap.on('dblclick', onMapDoubleClick);
+
+  }
+
+  private configMap(): void {
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
       attribution: '&copy;<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 
     }).addTo(this.leafletMap);
-
-    let icon = L.icon({
-
-      iconUrl: 'marker-icon.png',
-
-      iconSize: [30, 40]
-
-    });
-
-    let marker = L.marker([this.lat, this.lng], { icon: icon }).addTo(this.leafletMap)
-
-    let popup = L.popup()
-
-      .setContent('<h1>Click me</h1>');
-
-    marker.bindPopup(popup);
-
-
-    function onMapClick(e) {
-      alert("You clicked the map at " + e.latlng);
-    }
-
-    this.leafletMap.on('click', onMapClick);
 
     let osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -128,6 +197,25 @@ export class MapPage implements OnInit {
 
     //baseMaps.Topography.addTo(this.leafletMap);
 
+  }
+
+  closePopOver($event: Boolean) {
+    this.popOverOnClick();
+  }
+
+  private checkPermissions(): void {
+
+    this.geolocService.checkPermissions().subscribe(status => {
+      console.log(status);
+      if (status !== 'web' && (status.location !== 'granted' || status.coarseLocation !== 'granted')) {
+        this.setOpen(true);
+      }
+    });
+
+  }
+
+  setOpen(isOpen: boolean) {
+    this.isToastOpen = isOpen;
   }
 
 }

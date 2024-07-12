@@ -1,6 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Photo shoot</ion-title>
+    <ion-title>&nbsp;&nbsp;&nbsp;Photo shoot</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -21,5 +21,30 @@
     <ion-fab-button (click)="addPhotoToGallery()">
       <ion-icon name="camera"></ion-icon>
     </ion-fab-button>
+    <ion-fab-button (click)="addImageToGallery()">
+      <ion-icon name="image"></ion-icon>
+    </ion-fab-button>
   </ion-fab>
+
+  <ion-fab slot="fixed" vertical="top" horizontal="start">
+    <ion-fab-button>
+      <ion-icon name="chevron-forward-circle"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="end">
+      <ion-fab-button>
+        <ion-icon name="document"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button>
+        <ion-icon name="color-palette"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button>
+        <ion-icon name="globe"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
+
+
+  <ion-toast [isOpen]="isToastOpen" message="Lack of camera permission!!!" [duration]="5000"
+    (didDismiss)="setOpen(false)"></ion-toast>
+
 </ion-content>

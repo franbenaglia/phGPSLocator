@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'folder/inbox',
+    redirectTo: 'folder/map',
     pathMatch: 'full',
   },
   {
@@ -29,14 +29,6 @@ export const routes: Routes = [
   {
     path: 'folder/category',
     loadComponent: () => import('./category/category.page').then(m => m.CategoryPage)
-  },
-  {
-    path: 'folder/login',
-    loadComponent: () => import('./login/login.page').then(m => m.LoginPage)
-  },
-  {
-    path: 'folder/logout',
-    loadComponent: () => import('./logout/logout.page').then(m => m.LogoutPage)
   },
   {
     path: 'folder/photo',
