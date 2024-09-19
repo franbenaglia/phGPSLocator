@@ -10,9 +10,17 @@
       <ion-title size="large">map</ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-popover  #popover  trigger="top-center" side="top" alignment="center" [isOpen]="isPopoverOpen" (didDismiss)="isPopoverOpen = false">
+  <ion-popover class="popwidth" #popover size="cover" trigger="top-center" side="top" alignment="center"
+    [isOpen]="isPopoverOpen" (didDismiss)="isPopoverOpen = false">
     <ng-template>
-      <app-marker-content  (dismissPopOverEvent)="closePopOver($event)"  [coordinate]="coordinate"></app-marker-content>
+      <app-marker-content (openPhotoContent)="openPhotoContent($event)" (dismissPopOverEvent)="closePopOver($event)" [coordinate]="coordinate"></app-marker-content>
+    </ng-template>
+  </ion-popover>
+  <ion-popover class="popwidth" #popoverpic size="cover" trigger="top-center" side="top" alignment="center" [isOpen]="isPopoverPicOpen"
+    (didDismiss)="isPopoverPicOpen = false">
+    <ng-template>
+      <app-photo-content (dismissPopOverPicEvent)="closePopOverPic($event)"
+        [coordinate]="coordinate"></app-photo-content>
     </ng-template>
   </ion-popover>
   <ion-spinner *ngIf="spin"></ion-spinner>

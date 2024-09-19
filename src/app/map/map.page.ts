@@ -5,17 +5,18 @@ import { IonContent, IonHeader, IonTitle, IonToolbar, IonLabel, IonSpinner, IonP
 import * as L from 'leaflet';
 import { Platform } from '../model/platform';
 import { GeolocService } from '../services/geoloc.service';
-import { MarkerContentComponent } from '../components/marker-content/marker-content.component';
 import { Coordinate } from '../model/coordinate';
 import { StorageService } from '../services/storage.service';
 import { from } from 'rxjs';
+import { PhotoContentComponent } from '../components/photo-content/photo-content.component';
+import { MarkerContentComponent } from '../components/marker-content/marker-content.component';
 
 @Component({
   selector: 'app-map',
   templateUrl: './map.page.html',
   styleUrls: ['./map.page.scss'],
   standalone: true,
-  imports: [IonToast, MarkerContentComponent, IonInput, IonPopover, IonSpinner, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [IonToast, MarkerContentComponent, PhotoContentComponent, IonInput, IonPopover, IonSpinner, IonLabel, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
 })
 export class MapPage implements OnInit {
 
@@ -45,13 +46,15 @@ export class MapPage implements OnInit {
 
   isPopoverOpen: boolean = false;
 
+  isPopoverPicOpen: boolean = false;
+
   private iconMark = L.icon({
-    iconUrl: 'assets/icon/marker.png', //marker-icon.png
+    iconUrl: 'assets/icon/marker.png',
     iconSize: [30, 40]
   });
 
   private iconCurrentPosition = L.icon({
-    iconUrl: 'assets/icon/fab.png', //marker-icon.png
+    iconUrl: 'assets/icon/redmark.png',
     iconSize: [40, 50]
   });
 
@@ -98,6 +101,10 @@ export class MapPage implements OnInit {
   popOverOnClick = () => {
     this.isPopoverOpen = !this.isPopoverOpen;
 
+  }
+
+  popOverPicOnClick = () => {
+    this.isPopoverPicOpen = !this.isPopoverPicOpen;
   }
 
   private loadSavedMarkers(): void {
@@ -199,9 +206,21 @@ export class MapPage implements OnInit {
 
   }
 
+
+  openPhotoContent($event: Boolean) {
+    this.popOverPicOnClick();
+    //this.popOverOnClick();
+  }
+
   closePopOver($event: Boolean) {
     this.popOverOnClick();
   }
+
+
+  closePopOverPic($event: Boolean) {
+    this.popOverPicOnClick();
+  }
+
 
   private checkPermissions(): void {
 

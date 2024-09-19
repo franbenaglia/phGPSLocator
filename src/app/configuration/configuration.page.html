@@ -10,4 +10,16 @@
       <ion-title size="large">configuration</ion-title>
     </ion-toolbar>
   </ion-header>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-input label="Add Category" placeholder="Enter category" [(ngModel)]="category"></ion-input>
+      </ion-col>
+      <ion-col>
+        <ion-button (click)="categoryHandler()" shape="round" fill="outline">Accept</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-toast  position="top" [isOpen]="isToastOpen" message="Category added" [duration]="2500"
+    (didDismiss)="setOpen(false)"></ion-toast>
 </ion-content>

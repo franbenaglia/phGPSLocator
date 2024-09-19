@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, provideExperimentalZonelessChangeDetection } from '@angular/core';
 
 import { Camera, CameraResultType, CameraSource, GalleryPhotos, GalleryPhoto, Photo } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -7,16 +7,21 @@ import { UserPhoto } from '../model/userPhoto';
 import { Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { Observable, from, of } from 'rxjs';
+import { StorageService } from './storage.service';
+import { Coordinate } from '../model/coordinate';
+import { CategoryService } from './category.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PhotoService {
 
-  constructor(private platform: Platform) {
+  constructor(private categoryService: CategoryService, private platform: Platform, private storageService: StorageService) {
   }
 
   public photos: UserPhoto[] = [];
+  public coordinates: Coordinate[] = [];
+  public coordinateCategorized: CoordinateCategory[] = [];
 
   private PHOTO_STORAGE: string = 'photos';
 
@@ -108,12 +113,14 @@ export class PhotoService {
       return {
         filepath: savedFile.uri,
         webviewPath: Capacitor.convertFileSrc(savedFile.uri),
+        //base64Data: base64Data, TODO SEE THAT
       };
     }
     else {
       return {
         filepath: fileName,
-        webviewPath: photo.webPath
+        webviewPath: photo.webPath,
+        base64Data: base64Data,
       };
     }
   }
@@ -135,6 +142,64 @@ export class PhotoService {
         photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
       }
     }
+  }
+
+  public async loadSavedFromMarks() {
+
+    const { value } = await this.storageService.getPositions();
+    let coordinates = (value ? JSON.parse(value) : []) as Coordinate[];
+    this.coordinates = coordinates.filter(c => c.photo);
+    if (!this.platform.is('hybrid')) {
+
+      for (let c of this.coordinates) {
+
+        const readFile = await Filesystem.readFile({
+          path: c.photo.filepath,
+          directory: Directory.Data
+        });
+
+        c.photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
+      }
+    }
+  }
+
+
+  public async loadSavedCategorizedFromMarks() {
+
+    this.coordinateCategorized.length = 0;
+
+    const { value } = await this.storageService.getPositions();
+    let coordinates = (value ? JSON.parse(value) : []) as Coordinate[];
+    this.coordinates = coordinates.filter(c => c.photo);
+
+    if (!this.platform.is('hybrid')) {
+
+      for (let c of this.coordinates) {
+
+        const readFile = await Filesystem.readFile({
+          path: c.photo.filepath,
+          directory: Directory.Data
+        });
+
+        c.photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
+      }
+    }
+
+    let categories: string[] = [];
+    this.categoryService.getCategories().subscribe(cs => {
+      categories.push(...JSON.parse(cs.value));
+      categories.forEach(c => {
+        let t = this.coordinates.filter(co => co.category === c && co.photo);
+        if (t.length > 0) {
+          let cCat: CoordinateCategory = {
+            category: c,
+            coordinates: this.coordinates.filter(co => co.category === c)
+          }
+          this.coordinateCategorized.push(cCat);
+        }
+      });
+    });
+
   }
 
   private async readAsBase64(photo: Photo | GalleryPhoto) {
@@ -195,4 +260,9 @@ export class PhotoService {
   }
 
 
+}
+
+class CoordinateCategory {
+  coordinates: Coordinate[];
+  category: string;
 }

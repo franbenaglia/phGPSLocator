@@ -16,9 +16,29 @@
   </ion-header>
   <ion-grid>
     <ion-row>
+      Photos from camera
+    </ion-row>
+    <ion-row>
       <ion-col size="4" *ngFor="let photo of photoService.photos; index as position">
         <ion-img [src]="photo.webviewPath" (click)="showActionSheet(photo, position)"></ion-img>
       </ion-col>
     </ion-row>
   </ion-grid>
+  Photos from marks
+  <ion-grid *ngFor="let cc of photoService.coordinateCategorized">
+    <ion-row>
+      {{cc.category}}
+    </ion-row>
+    <ion-row>
+      <ion-col size="4" *ngFor="let c of cc.coordinates">
+        <app-photo-album-container [coordinate]="c" />
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
+
+
+
+
 </ion-content>

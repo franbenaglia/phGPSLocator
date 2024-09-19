@@ -26,9 +26,6 @@ export class StorageService {
 
   public async updatePosition(coordinate: Coordinate, coors: Coordinate[]) {
 
-    coordinate.description = coordinate.description;
-    coordinate.title = coordinate.title;
-
     let coordinatesChanged = coors.map(c => (c.lat === coordinate.lat && c.lng === coordinate.lng) ? coordinate : c);
 
     this.coordinates.length = 0;

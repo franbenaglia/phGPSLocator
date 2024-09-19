@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
     { title: 'Import', url: '/folder/import', icon: 'paper-plane' },
     { title: 'Export', url: '/folder/export', icon: 'paper-plane' },
     { title: 'Photo-album', url: '/folder/photo-album', icon: 'paper-plane' },
-    { title: 'Category', url: '/folder/category', icon: 'paper-plane' },
+    //{ title: 'Category', url: '/folder/category', icon: 'paper-plane' },
 
   ];
   constructor() {
